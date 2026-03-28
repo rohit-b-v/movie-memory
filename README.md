@@ -22,9 +22,22 @@ GEMINI_API_KEY="your_gemini_key"
 ```
 
 ## Architecture Overview
-This application uses the Next.js App Router for both frontend React components and backend API routes. Prisma serves as the ORM to interact with a PostgreSQL database. Authentication is handled securely via NextAuth.js with Google OAuth. State management and data fetching on the client are handled by SWR to provide a fast and reactive user experience. 
+This application is built on the Next.js App Router framework, leveraging both Client and Server Components to optimize performance and SEO.
 
-For the AI trivia generation, the backend implements a graceful degradation strategy. The API first attempts to fetch a fact using the OpenAI API. If the request fails due to rate limits or network issues, it catches the error and automatically falls back to the Google Gemini API. This ensures high availability and a seamless user experience even when third-party services experience downtime.
+### The Backend
+The server layer consists of Next.js API Routes that act as a bridge between the frontend and the PostgreSQL database. I chose Prisma as the ORM because of its excellent TypeScript integration and type safety. Authentication is handled by NextAuth.js using the Google OAuth provider. The session is managed via JWTs, ensuring that only authenticated users can access the /api/me and /api/fact endpoints.
+
+### AI Implementation & Resilience
+A key feature of the architecture is the AI Fallback System. The backend is designed for high availability by attempting to fetch movie trivia from OpenAI (GPT-4o-mini) first. If the request fails due to rate limits or account quotas, the system catches the error and executes a fallback request to Google Gemini 2.5 Flash. This graceful degradation ensures the user experience is never interrupted by third party API downtime.
+
+### The Frontend
+The UI is styled with Tailwind CSS for a clean and responsive dashboard. For data fetching and state management, I implemented SWR (Stale-While-Revalidate). This allows for:
+
+Automatic Revalidation: Data stays fresh without manual refreshes.
+
+Request Deduping: Multiple components can request the same data without triggering redundant network calls.
+
+Optimistic UI Updates: The UI responds instantly to user input while the database updates in the background.
 
 ## Variant Chosen: Variant B (Frontend/API-Focused)
 I chose Variant B because client orchestration and defining strong API contracts are critical for building scalable user interfaces. I implemented a strongly-typed API wrapper (`lib/api.ts`) to normalize error handling across the app. 
